@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Contracts\Repositories\CustomerProfileRepositoryInterface;
 use App\Contracts\Repositories\GroceryItemRepositoryInterface;
 use App\Contracts\Repositories\OrderRepositoryInterface;
+use App\Repositories\CustomerProfileRepository;
 use App\Repositories\GroceryItemRepository;
 use App\Repositories\OrderRepository;
 use Illuminate\Support\ServiceProvider;
@@ -17,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(GroceryItemRepositoryInterface::class, GroceryItemRepository::class);
         $this->app->bind(OrderRepositoryInterface::class, OrderRepository::class);
+        $this->app->bind(CustomerProfileRepositoryInterface::class, CustomerProfileRepository::class);
     }
 
     /**
