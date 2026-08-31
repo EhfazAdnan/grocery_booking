@@ -8,6 +8,94 @@ The project must be developed **task-by-task**, not all at once.
 
 GitHub Copilot should use this document as the project-level development specification. For each task:
 
+## Architecture Blueprint
+
+The application must follow a clean Laravel architecture built around a repository pattern, a service layer, and Eloquent ORM.
+
+### 1) Repository Pattern
+- Persistence logic belongs in repositories, not controllers.
+- Each important domain area should have a repository contract and implementation.
+- Example repositories:
+  - `GroceryItemRepositoryInterface` + `GroceryItemRepository`
+  - `OrderRepositoryInterface` + `OrderRepository`
+- Repositories are responsible for query building, filtering, pagination, and persistence operations.
+
+### 2) Service Layer
+- Business logic lives in services.
+- Services orchestrate domain rules and coordinate repositories.
+- Example services:
+  - `AuthService`
+  - `GroceryItemService`
+  - `OrderService`
+- Controllers should remain thin and only handle HTTP request/response concerns.
+
+### 3) ORM and Model Layer
+- Eloquent models are responsible for relationships and model-level rules.
+- Models should not carry all business logic; business rules belong in services.
+- Use relationships such as:
+  - `User hasMany Order`
+  - `Order hasMany OrderItem`
+  - `OrderItem belongsTo GroceryItem`
+  - `GroceryItem hasMany OrderItem`
+- Use Eloquent for querying, filtering, and relationship loading.
+
+### 4) Recommended Layer Flow
+
+```text
+Route
+  ↓
+Middleware
+  ↓
+Controller
+  ↓
+Service
+  ↓
+Repository Interface
+  ↓
+Eloquent Repository
+  ↓
+Database
+```
+
+### 5) Required Implementation Rule
+Do not place database queries or business rules directly inside controllers.
+All domain-level logic must be implemented through services and repositories, with Eloquent used as the ORM layer.
+
+### 6) Repository/Service Directory Structure
+
+```text
+app/
+├── Contracts/
+│   └── Repositories/
+│       ├── GroceryItemRepositoryInterface.php
+│       └── OrderRepositoryInterface.php
+├── Http/
+│   ├── Controllers/
+│   │   ├── Api/
+│   │   │   ├── Admin/
+│   │   │   └── User/
+│   │   └── Web/
+│   ├── Middleware/
+│   └── Requests/
+├── Models/
+│   ├── User.php
+│   ├── GroceryItem.php
+│   ├── Order.php
+│   └── OrderItem.php
+├── Repositories/
+│   ├── GroceryItemRepository.php
+│   └── OrderRepository.php
+├── Services/
+│   ├── AuthService.php
+│   ├── GroceryItemService.php
+│   └── OrderService.php
+└── Providers/
+    └── RepositoryServiceProvider.php
+```
+
+This architecture is mandatory for the implementation of the grocery booking system and must be respected across all future phases.
+
+
 1. Implement **only the current task**.
 2. Do not prematurely implement future tasks.
 3. Follow the architecture and conventions defined in this document.
