@@ -54,18 +54,21 @@
 
 ---
 
-## Phase 3 — Role-Based Access Control (PENDING)
+## Phase 3 — Role-Based Access Control ✅ COMPLETED
 
-### Task 06 — Create Roles & Permissions
-- [ ] Create roles table (admin, customer)
-- [ ] Middleware: CheckRole
-- [ ] Middleware: CheckPermission
-- [ ] Seed default roles
+### Task 06 — Create Roles & Permissions ✅
+- [x] Create roles table (admin, customer)
+- [x] Middleware: CheckRole
+- [x] Middleware: CheckPermission
+- [x] Seed default roles
 
-### Task 07 — Admin Authorization Middleware
-- [ ] Verify admin role in protected routes
-- [ ] Deny customer access to admin endpoints
-- [ ] Test role-based restrictions
+### Task 07 — Admin Authorization Middleware ✅
+- [x] Verify admin role in protected routes
+- [x] Deny customer access to admin endpoints
+- [x] Test role-based restrictions
+
+**Completed:** Role-based authorization with JWT middleware and admin-only route enforcement
+**Verification:** `php artisan test tests/Feature/AuthTest.php` → 14 passed (40 assertions)
 
 ---
 

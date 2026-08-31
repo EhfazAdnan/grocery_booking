@@ -225,6 +225,41 @@ class AuthTest extends TestCase
         $response->assertStatus(200)
             ->assertJson(['message' => 'User logged out successfully']);
     }
+
+    /**
+     * Test admin route rejects customer users.
+     */
+    public function test_admin_route_rejects_customer_user(): void
+    {
+        $user = User::factory()->create([
+            'role' => Role::CUSTOMER,
+        ]);
+        $token = $this->jwtGuard()->login($user);
+
+        $response = $this->getJson('/api/admin/test', [
+            'Authorization' => "Bearer {$token}",
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Test admin route allows admin users.
+     */
+    public function test_admin_route_allows_admin_user(): void
+    {
+        $user = User::factory()->create([
+            'role' => Role::ADMIN,
+        ]);
+        $token = $this->jwtGuard()->login($user);
+
+        $response = $this->getJson('/api/admin/test', [
+            'Authorization' => "Bearer {$token}",
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson(['ok' => true]);
+    }
 }
 
 
