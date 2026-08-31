@@ -120,4 +120,70 @@ class CustomerFeaturesTest extends TestCase
             'email' => 'alice.updated@example.com',
         ]);
     }
+
+    public function test_customer_can_place_order_with_valid_items(): void
+    {
+        $customer = User::factory()->customer()->create();
+        $item = GroceryItem::factory()->create([
+            'name' => 'Orange',
+            'price' => 25,
+            'stock' => 5,
+            'is_active' => true,
+        ]);
+
+        $token = $this->jwtGuard()->login($customer);
+
+        $response = $this->postJson('/api/customer/orders', [
+            'items' => [
+                ['product_id' => $item->id, 'quantity' => 2],
+            ],
+        ], [
+            'Authorization' => 'Bearer '.$token,
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.total_amount', '50.00')
+            ->assertJsonPath('data.items.0.product_id', $item->id)
+            ->assertJsonPath('data.items.0.quantity', 2);
+
+        $this->assertDatabaseHas('orders', [
+            'user_id' => $customer->id,
+            'total_amount' => '50.00',
+        ]);
+
+        $this->assertDatabaseHas('order_items', [
+            'grocery_item_id' => $item->id,
+            'quantity' => 2,
+            'subtotal' => '50.00',
+        ]);
+
+        $this->assertDatabaseHas('grocery_items', [
+            'id' => $item->id,
+            'stock' => 3,
+        ]);
+    }
+
+    public function test_customer_cannot_place_order_when_stock_is_insufficient(): void
+    {
+        $customer = User::factory()->customer()->create();
+        $item = GroceryItem::factory()->create([
+            'name' => 'Mango',
+            'price' => 30,
+            'stock' => 1,
+            'is_active' => true,
+        ]);
+
+        $token = $this->jwtGuard()->login($customer);
+
+        $response = $this->postJson('/api/customer/orders', [
+            'items' => [
+                ['product_id' => $item->id, 'quantity' => 2],
+            ],
+        ], [
+            'Authorization' => 'Bearer '.$token,
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonStructure(['errors']);
+    }
 }

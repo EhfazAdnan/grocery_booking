@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Api\Customer;
 
 use App\Models\User;
 use App\Services\CustomerService;
+use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class CustomerController
 {
-    public function __construct(protected CustomerService $customerService) {}
+    public function __construct(
+        protected CustomerService $customerService,
+        protected OrderService $orderService,
+    ) {}
 
     public function products(Request $request): JsonResponse
     {
@@ -57,6 +61,39 @@ class CustomerController
             $updatedUser = $this->customerService->updateProfile($user, $request->all());
 
             return response()->json(['data' => $updatedUser], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+    }
+
+    public function placeOrder(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        try {
+            $order = $this->orderService->placeOrder($user, $request->all());
+
+            $items = $order->items->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'order_id' => $item->order_id,
+                    'product_id' => $item->grocery_item_id,
+                    'grocery_item_id' => $item->grocery_item_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => (string) $item->unit_price,
+                    'subtotal' => (string) $item->subtotal,
+                ];
+            })->values();
+
+            return response()->json([
+                'data' => [
+                    'id' => $order->id,
+                    'user_id' => $order->user_id,
+                    'status' => $order->status,
+                    'total_amount' => (string) $order->total_amount,
+                    'items' => $items,
+                ],
+            ], 201);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }

@@ -14,6 +14,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
 
     Route::middleware('role:customer')->group(function () {
+        Route::post('/customer/orders', [\App\Http\Controllers\Api\Customer\CustomerController::class, 'placeOrder']);
         Route::get('/customer/orders', [\App\Http\Controllers\Api\Customer\CustomerController::class, 'orders']);
         Route::get('/customer/profile', [\App\Http\Controllers\Api\Customer\CustomerController::class, 'profile']);
         Route::put('/customer/profile', [\App\Http\Controllers\Api\Customer\CustomerController::class, 'updateProfile']);
