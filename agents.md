@@ -19,35 +19,38 @@
 
 ---
 
-## Phase 2 — Authentication & JWT Setup (PENDING)
+## Phase 2 — Authentication & JWT Setup ✅ COMPLETED
 
-### Task 02 — Install & Configure Laravel Sanctum/JWT
-- [ ] Install `tymon/jwt-auth` package
-- [ ] Publish JWT config
-- [ ] Create JWT secrets in .env
-- [ ] Configure `config/auth.php` for JWT guard
-- [ ] Test JWT token generation
+### Task 02 — Install & Configure Laravel Sanctum/JWT ✅
+- [x] Install `tymon/jwt-auth` package
+- [x] Publish JWT config
+- [x] Create JWT secrets in .env
+- [x] Configure `config/auth.php` for JWT guard
+- [x] Test JWT token generation
 
-### Task 03 — Create User Model & Database
-- [ ] User migration (email, password, role)
-- [ ] Role enum (admin, customer)
-- [ ] User factory for testing
-- [ ] Hash password in model mutator
+### Task 03 — Create User Model & Database ✅
+- [x] User migration (email, password, role)
+- [x] Role enum (admin, customer)
+- [x] User factory for testing
+- [x] Hash password in model mutator
 
-### Task 04 — Build Auth Controller & Routes
-- [ ] Register endpoint (email validation, password hashing)
-- [ ] Login endpoint (JWT token generation)
-- [ ] Logout endpoint
-- [ ] Refresh token endpoint
-- [ ] Protected route middleware test
-- [ ] Add API routes
+### Task 04 — Build Auth Controller & Routes ✅
+- [x] Register endpoint (email validation, password hashing)
+- [x] Login endpoint (JWT token generation)
+- [x] Logout endpoint
+- [x] Refresh token endpoint
+- [x] Protected route middleware test
+- [x] Add API routes
 
-### Task 05 — Create Auth Tests
-- [ ] Test successful registration
-- [ ] Test login with valid credentials
-- [ ] Test login with invalid credentials
-- [ ] Test protected route access
-- [ ] Test token refresh
+### Task 05 — Create Auth Tests ✅
+- [x] Test successful registration
+- [x] Test login with valid credentials
+- [x] Test login with invalid credentials
+- [x] Test protected route access
+- [x] Test token refresh
+
+**Completed:** Phase 2 authentication flow with JWT and role support
+**Verification:** `php artisan test tests/Feature/AuthTest.php` → 12 passed (37 assertions)
 
 ---
 
