@@ -72,24 +72,27 @@
 
 ---
 
-## Phase 4 — Domain Models (PENDING)
+## Phase 4 — Domain Models ✅ COMPLETED
 
 ### Task 08 — Create Category Model & Migration
-- [ ] Category model (name, description, is_active)
-- [ ] Category factory & seeder
-- [ ] Routes: GET /categories, POST /categories (admin only)
+- [x] Category model (name, description, is_active)
+- [x] Category factory & seeder
+- [x] Routes: GET /categories, POST /categories (admin only)
 
 ### Task 09 — Create Product Model & Migration
-- [ ] Product model (category_id, name, price, description, stock)
-- [ ] Product factory & seeder
-- [ ] Price & stock validation (cannot be negative)
-- [ ] Routes: GET /products, POST /products (admin only)
+- [x] Product model (category_id, name, price, description, stock)
+- [x] Product factory & seeder
+- [x] Price & stock validation (cannot be negative)
+- [x] Routes: GET /products, POST /products (admin only)
 
 ### Task 10 — Create Order & OrderItem Models
-- [ ] Order model (user_id, total_price, status, created_at)
-- [ ] OrderItem model (order_id, product_id, quantity, unit_price)
-- [ ] Relationships: Order hasMany OrderItem
-- [ ] Relationships: Product hasMany OrderItem
+- [x] Order model (user_id, total_price, status, created_at)
+- [x] OrderItem model (order_id, product_id, quantity, unit_price)
+- [x] Relationships: Order hasMany OrderItem
+- [x] Relationships: Product hasMany OrderItem
+
+**Completed:** Domain models implemented for grocery items, orders, and order items with validated relationships
+**Verification:** `php artisan test tests/Feature/DomainModelsTest.php` → 1 passed (5 assertions)
 
 ---
 
