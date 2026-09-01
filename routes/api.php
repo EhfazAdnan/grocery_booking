@@ -4,8 +4,10 @@ use App\Http\Controllers\Api\Admin\AdminOrderController;
 use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/auth/register', [AuthController::class, 'register']);
+    Route::post('/auth/login', [AuthController::class, 'login']);
+});
 
 Route::get('/customer/products', [\App\Http\Controllers\Api\Customer\CustomerController::class, 'products']);
 
@@ -15,7 +17,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
 
     Route::middleware('role:customer')->group(function () {
-        Route::post('/customer/orders', [\App\Http\Controllers\Api\Customer\CustomerController::class, 'placeOrder']);
+        Route::middleware('throttle:10,1')->group(function () {
+            Route::post('/customer/orders', [\App\Http\Controllers\Api\Customer\CustomerController::class, 'placeOrder']);
+        });
         Route::get('/customer/orders', [\App\Http\Controllers\Api\Customer\CustomerController::class, 'orders']);
         Route::get('/customer/orders/{order}', [\App\Http\Controllers\Api\Customer\CustomerController::class, 'orderDetail']);
         Route::get('/customer/profile', [\App\Http\Controllers\Api\Customer\CustomerController::class, 'profile']);

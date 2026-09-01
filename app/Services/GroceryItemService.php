@@ -25,8 +25,8 @@ class GroceryItemService
     {
         $validator = Validator::make($data, [
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:1000',
+            'price' => 'required|numeric|gt:0|decimal:0,2',
             'stock' => 'required|integer|min:0',
             'is_active' => 'boolean',
         ]);
@@ -51,8 +51,8 @@ class GroceryItemService
     {
         $validator = Validator::make($data, [
             'name' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'sometimes|required|numeric|min:0',
+            'description' => 'nullable|string|max:1000',
+            'price' => 'sometimes|required|numeric|gt:0|decimal:0,2',
             'stock' => 'sometimes|required|integer|min:0',
             'is_active' => 'sometimes|boolean',
         ]);
