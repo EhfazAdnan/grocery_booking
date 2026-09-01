@@ -43,6 +43,18 @@ class OrderService
                 foreach ($items as $entry) {
                     $product = GroceryItem::query()->lockForUpdate()->findOrFail($entry['product_id']);
 
+                    if (! $product->is_active) {
+                        Log::warning('Order placement failed - product is inactive', [
+                            'user_id' => $user->id,
+                            'product_id' => $product->id,
+                            'product_name' => $product->name,
+                        ]);
+
+                        throw ValidationException::withMessages([
+                            'items' => ['Product is not available: '.$product->name],
+                        ]);
+                    }
+
                     if ($product->stock < $entry['quantity']) {
                         Log::warning('Order placement failed - insufficient stock', [
                             'user_id' => $user->id,
