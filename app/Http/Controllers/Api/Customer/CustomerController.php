@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Customer;
 
+use App\Models\Order;
 use App\Models\User;
 use App\Services\CustomerService;
 use App\Services\OrderService;
@@ -97,5 +98,43 @@ class CustomerController
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
+    }
+
+    /**
+     * Get customer's specific order details.
+     * GET /customer/orders/{id}
+     */
+    public function orderDetail(Request $request, Order $order): JsonResponse
+    {
+        $user = $request->user();
+
+        // Verify the order belongs to the current user
+        if ($order->user_id !== $user->id) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
+        $items = $order->items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'order_id' => $item->order_id,
+                'product_id' => $item->grocery_item_id,
+                'product_name' => $item->groceryItem->name,
+                'quantity' => $item->quantity,
+                'unit_price' => (string) $item->unit_price,
+                'subtotal' => (string) $item->subtotal,
+            ];
+        })->values();
+
+        return response()->json([
+            'data' => [
+                'id' => $order->id,
+                'user_id' => $order->user_id,
+                'status' => $order->status,
+                'total_amount' => (string) $order->total_amount,
+                'status_changed_at' => $order->status_changed_at,
+                'created_at' => $order->created_at,
+                'items' => $items,
+            ],
+        ], 200);
     }
 }

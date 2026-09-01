@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,10 +16,13 @@ class Order extends Model
         'user_id',
         'status',
         'total_amount',
+        'status_changed_at',
     ];
 
     protected $casts = [
         'total_amount' => 'decimal:2',
+        'status' => OrderStatus::class,
+        'status_changed_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
