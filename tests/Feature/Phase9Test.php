@@ -8,15 +8,18 @@ use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tymon\JWTAuth\Facades\JWTAuth as JWT;
+use Tymon\JWTAuth\JWTGuard;
 
 class Phase9Test extends TestCase
 {
     use RefreshDatabase;
 
-    protected function jwtGuard()
+    protected function jwtGuard(): JWTGuard
     {
-        return auth('api');
+        /** @var JWTGuard $guard */
+        $guard = auth('api');
+
+        return $guard;
     }
 
     /**
@@ -38,7 +41,7 @@ class Phase9Test extends TestCase
             'total_amount' => 50,
         ]);
 
-        $token = auth('api')->fromUser($admin);
+        $token = $this->jwtGuard()->fromUser($admin);
 
         // Change status to confirmed
         $response = $this->putJson('/api/admin/orders/'.$order->id.'/status', [
@@ -69,7 +72,7 @@ class Phase9Test extends TestCase
             'total_amount' => 50,
         ]);
 
-        $token = auth('api')->fromUser($admin);
+        $token = $this->jwtGuard()->fromUser($admin);
 
         $response = $this->putJson('/api/admin/orders/'.$order->id.'/status', [
             'status' => 'pending',
@@ -97,7 +100,7 @@ class Phase9Test extends TestCase
             'total_amount' => 50,
         ]);
 
-        $token = auth('api')->fromUser($customer);
+        $token = $this->jwtGuard()->fromUser($customer);
 
         // Try to change status (should fail because endpoint requires admin role)
         $response = $this->putJson('/api/admin/orders/'.$order->id.'/status', [
@@ -135,7 +138,7 @@ class Phase9Test extends TestCase
             'subtotal' => 100,
         ]);
 
-        $token = auth('api')->fromUser($customer);
+        $token = $this->jwtGuard()->fromUser($customer);
 
         $response = $this->getJson('/api/customer/orders/'.$order->id, [
             'Authorization' => 'Bearer '.$token,
@@ -179,7 +182,7 @@ class Phase9Test extends TestCase
             'total_amount' => 50,
         ]);
 
-        $token = auth('api')->fromUser($customer1);
+        $token = $this->jwtGuard()->fromUser($customer1);
 
         $response = $this->getJson('/api/customer/orders/'.$order->id, [
             'Authorization' => 'Bearer '.$token,
@@ -209,7 +212,7 @@ class Phase9Test extends TestCase
             'created_at' => now(),
         ]);
 
-        $token = auth('api')->fromUser($admin);
+        $token = $this->jwtGuard()->fromUser($admin);
 
         $response = $this->getJson('/api/admin/analytics/revenue', [
             'Authorization' => 'Bearer '.$token,
@@ -247,7 +250,7 @@ class Phase9Test extends TestCase
             'created_at' => now(),
         ]);
 
-        $token = auth('api')->fromUser($admin);
+        $token = $this->jwtGuard()->fromUser($admin);
 
         $startDate = now()->subDays(2)->toDateString();
         $endDate = now()->toDateString();
@@ -296,7 +299,7 @@ class Phase9Test extends TestCase
             ],
         ]);
 
-        $token = auth('api')->fromUser($admin);
+        $token = $this->jwtGuard()->fromUser($admin);
 
         $response = $this->getJson('/api/admin/analytics/top-products?limit=10', [
             'Authorization' => 'Bearer '.$token,
@@ -339,7 +342,7 @@ class Phase9Test extends TestCase
             'created_at' => now()->subDays(1),
         ]);
 
-        $token = auth('api')->fromUser($admin);
+        $token = $this->jwtGuard()->fromUser($admin);
 
         $response = $this->getJson('/api/admin/analytics/order-count?period=daily', [
             'Authorization' => 'Bearer '.$token,
@@ -370,7 +373,7 @@ class Phase9Test extends TestCase
             'total_amount' => 100,
         ]);
 
-        $token = auth('api')->fromUser($admin);
+        $token = $this->jwtGuard()->fromUser($admin);
 
         $response = $this->getJson('/api/admin/analytics/order-count?period=monthly', [
             'Authorization' => 'Bearer '.$token,
@@ -392,7 +395,7 @@ class Phase9Test extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $token = auth('api')->fromUser($admin);
+        $token = $this->jwtGuard()->fromUser($admin);
 
         $response = $this->getJson('/api/admin/analytics/order-count?period=invalid', [
             'Authorization' => 'Bearer '.$token,
@@ -405,7 +408,7 @@ class Phase9Test extends TestCase
     {
         $customer = User::factory()->customer()->create();
 
-        $token = auth('api')->fromUser($customer);
+        $token = $this->jwtGuard()->fromUser($customer);
 
         $response = $this->getJson('/api/admin/analytics/revenue', [
             'Authorization' => 'Bearer '.$token,
