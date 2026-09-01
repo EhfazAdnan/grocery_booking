@@ -18,6 +18,28 @@ class AdminOrderController
     ) {}
 
     /**
+     * List all orders with pagination.
+     * GET /admin/orders?per_page=10&page=1
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $perPage = (int) $request->query('per_page', 10);
+        $orders = Order::with(['user', 'items'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => $orders->items(),
+            'pagination' => [
+                'total' => $orders->total(),
+                'per_page' => $orders->perPage(),
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+            ]
+        ], 200);
+    }
+
+    /**
      * Change order status.
      * PUT /admin/orders/{id}/status
      */

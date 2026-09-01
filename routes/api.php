@@ -35,6 +35,7 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/admin/grocery-items/{groceryItem}', [\App\Http\Controllers\Api\Admin\GroceryItemController::class, 'destroy']);
 
         // Order management
+        Route::get('/admin/orders', [AdminOrderController::class, 'index']);
         Route::put('/admin/orders/{order}/status', [AdminOrderController::class, 'changeStatus']);
 
         // Analytics
