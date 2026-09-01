@@ -8,6 +8,7 @@ use App\Models\GroceryItem;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -15,7 +16,8 @@ class OrderService
 {
     public function __construct(
         protected OrderRepositoryInterface $orderRepository,
-        protected OrderItemRepositoryInterface $orderItemRepository
+        protected OrderItemRepositoryInterface $orderItemRepository,
+        protected InventoryService $inventoryService
     ) {}
 
     public function placeOrder(User $user, array $payload): Order
@@ -33,54 +35,88 @@ class OrderService
         $validated = $validator->validated();
         $items = $validated['items'];
 
-        return DB::transaction(function () use ($user, $items) {
-            $totalAmount = 0;
-            $orderItems = [];
+        try {
+            return DB::transaction(function () use ($user, $items) {
+                $totalAmount = 0;
+                $orderItems = [];
 
-            foreach ($items as $entry) {
-                $product = GroceryItem::query()->lockForUpdate()->findOrFail($entry['product_id']);
+                foreach ($items as $entry) {
+                    $product = GroceryItem::query()->lockForUpdate()->findOrFail($entry['product_id']);
 
-                if ($product->stock < $entry['quantity']) {
-                    throw ValidationException::withMessages([
-                        'items' => ['Insufficient stock for product: '.$product->name],
-                    ]);
+                    if ($product->stock < $entry['quantity']) {
+                        Log::warning('Order placement failed - insufficient stock', [
+                            'user_id' => $user->id,
+                            'product_id' => $product->id,
+                            'product_name' => $product->name,
+                            'requested' => $entry['quantity'],
+                            'available' => $product->stock,
+                        ]);
+
+                        throw ValidationException::withMessages([
+                            'items' => ['Insufficient stock for product: '.$product->name],
+                        ]);
+                    }
+
+                    $subtotal = $product->price * $entry['quantity'];
+                    $totalAmount += $subtotal;
+
+                    $orderItems[] = [
+                        'product_id' => $product->id,
+                        'grocery_item_id' => $product->id,
+                        'quantity' => $entry['quantity'],
+                        'unit_price' => $product->price,
+                        'subtotal' => $subtotal,
+                    ];
                 }
 
-                $subtotal = $product->price * $entry['quantity'];
-                $totalAmount += $subtotal;
-
-                $orderItems[] = [
-                    'product_id' => $product->id,
-                    'grocery_item_id' => $product->id,
-                    'quantity' => $entry['quantity'],
-                    'unit_price' => $product->price,
-                    'subtotal' => $subtotal,
-                ];
-            }
-
-            $order = $this->orderRepository->create([
-                'user_id' => $user->id,
-                'status' => 'pending',
-                'total_amount' => $totalAmount,
-            ]);
-
-            foreach ($orderItems as $item) {
-                $this->orderItemRepository->createForOrder($order, [
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                    'subtotal' => $item['subtotal'],
+                $order = $this->orderRepository->create([
+                    'user_id' => $user->id,
+                    'status' => 'pending',
+                    'total_amount' => $totalAmount,
                 ]);
 
-                $product = GroceryItem::query()->lockForUpdate()->findOrFail($item['product_id']);
-                $product->decrement('stock', $item['quantity']);
-            }
+                Log::info('Order created', [
+                    'order_id' => $order->id,
+                    'user_id' => $user->id,
+                    'total_amount' => $totalAmount,
+                    'item_count' => count($orderItems),
+                ]);
 
-            $order->load('items');
+                foreach ($orderItems as $item) {
+                    $this->orderItemRepository->createForOrder($order, [
+                        'product_id' => $item['product_id'],
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $item['unit_price'],
+                        'subtotal' => $item['subtotal'],
+                    ]);
 
-            $order->update(['total_amount' => $totalAmount]);
+                    $this->inventoryService->decrementStock($item['product_id'], $item['quantity']);
+                }
 
-            return $order->fresh();
-        });
+                $order->load('items');
+                $order->update(['total_amount' => $totalAmount]);
+
+                Log::info('Order placement completed successfully', [
+                    'order_id' => $order->id,
+                    'user_id' => $user->id,
+                ]);
+
+                return $order->fresh();
+            }, attempts: 3);
+        } catch (ValidationException $e) {
+            Log::error('Order placement validation error', [
+                'user_id' => $user->id,
+                'errors' => $e->errors(),
+            ]);
+
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Order placement transaction error', [
+                'user_id' => $user->id,
+                'exception' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
     }
 }
