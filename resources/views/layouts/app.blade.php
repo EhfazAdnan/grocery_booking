@@ -51,6 +51,16 @@
                         <a href="/login" class="text-gray-700 hover:text-green-600 transition">Login</a>
                         <a href="/register" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Register</a>
                     @endauth
+
+                    <!-- Language Switcher -->
+                    <select onchange="window.location.href='/locale/'+this.value"
+                            class="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                        @foreach (['en', 'bn', 'es', 'fr'] as $lang)
+                            <option value="{{ $lang }}" {{ app()->getLocale() === $lang ? 'selected' : '' }}>
+                                {{ __('messages.language.'.$lang) }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
         </div>

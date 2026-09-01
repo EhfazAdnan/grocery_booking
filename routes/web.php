@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
+
+// Locale Switcher
+Route::get('/locale/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
 
 // Home/Welcome
 Route::get('/', function () {

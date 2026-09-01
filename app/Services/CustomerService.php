@@ -9,6 +9,7 @@ use App\Models\GroceryItem;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -23,25 +24,29 @@ class CustomerService
 
     public function browseProducts(array $filters = []): mixed
     {
-        $query = GroceryItem::query()->where('is_active', true);
+        $cacheKey = 'products.'.md5(json_encode($filters));
 
-        if (! empty($filters['search'])) {
-            $query->where('name', 'like', '%'.$filters['search'].'%');
-        }
+        return Cache::remember($cacheKey, 60, function () use ($filters) {
+            $query = GroceryItem::query()->where('is_active', true);
 
-        if (! empty($filters['category_id'])) {
-            $query->where('category_id', $filters['category_id']);
-        }
+            if (! empty($filters['search'])) {
+                $query->where('name', 'like', '%'.$filters['search'].'%');
+            }
 
-        if (! empty($filters['min_price'])) {
-            $query->where('price', '>=', $filters['min_price']);
-        }
+            if (! empty($filters['category_id'])) {
+                $query->where('category_id', $filters['category_id']);
+            }
 
-        if (! empty($filters['max_price'])) {
-            $query->where('price', '<=', $filters['max_price']);
-        }
+            if (! empty($filters['min_price'])) {
+                $query->where('price', '>=', $filters['min_price']);
+            }
 
-        return $query->orderByDesc('created_at')->paginate(15);
+            if (! empty($filters['max_price'])) {
+                $query->where('price', '<=', $filters['max_price']);
+            }
+
+            return $query->orderByDesc('created_at')->paginate(15);
+        });
     }
 
     public function getOrderHistory(User $user): mixed
