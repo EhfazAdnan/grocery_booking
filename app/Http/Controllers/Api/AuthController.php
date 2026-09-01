@@ -16,16 +16,12 @@ class AuthController
      */
     public function register(Request $request): JsonResponse
     {
-        try {
-            $user = $this->authService->register($request->all());
+        $user = $this->authService->register($request->all());
 
-            return response()->json([
-                'message' => 'User registered successfully',
-                'user' => $user,
-            ], 201);
-        } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        }
+        return response()->json([
+            'message' => 'User registered successfully',
+            'user' => $user,
+        ], 201);
     }
 
     /**
@@ -33,14 +29,13 @@ class AuthController
      */
     public function login(Request $request): JsonResponse
     {
-        try {
-            $token = $this->authService->login($request->all());
-        } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        }
+        $token = $this->authService->login($request->all());
 
         if (!$token) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials',
+            ], 401);
         }
 
         return response()->json($this->authService->tokenResponse($token), 200);

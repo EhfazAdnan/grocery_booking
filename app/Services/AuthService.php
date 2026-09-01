@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\JWTGuard;
@@ -23,12 +24,19 @@ class AuthService
             throw new ValidationException($validator);
         }
 
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => Role::CUSTOMER,
         ]);
+
+        Log::info('User registered successfully', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+        ]);
+
+        return $user;
     }
 
     public function login(array $credentials): string|false
@@ -45,7 +53,22 @@ class AuthService
         /** @var JWTGuard $guard */
         $guard = auth('api');
 
-        return $guard->attempt($credentials);
+        $token = $guard->attempt($credentials);
+
+        if ($token) {
+            $user = $guard->user();
+
+            Log::info('User logged in successfully', [
+                'user_id' => $user?->id,
+                'email' => $credentials['email'],
+            ]);
+        } else {
+            Log::warning('Failed login attempt', [
+                'email' => $credentials['email'],
+            ]);
+        }
+
+        return $token;
     }
 
     public function me(): ?User
@@ -60,6 +83,13 @@ class AuthService
     {
         /** @var JWTGuard $guard */
         $guard = auth('api');
+
+        $user = $guard->user();
+
+        Log::info('User logged out', [
+            'user_id' => $user?->id,
+        ]);
+
         $guard->logout();
     }
 
@@ -67,6 +97,12 @@ class AuthService
     {
         /** @var JWTGuard $guard */
         $guard = auth('api');
+
+        $user = $guard->user();
+
+        Log::info('Token refreshed', [
+            'user_id' => $user?->id,
+        ]);
 
         return $guard->refresh();
     }

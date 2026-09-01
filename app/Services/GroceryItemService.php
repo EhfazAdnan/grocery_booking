@@ -6,6 +6,7 @@ use App\Contracts\Repositories\GroceryItemRepositoryInterface;
 use App\Models\GroceryItem;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -34,7 +35,16 @@ class GroceryItemService
             throw new ValidationException($validator);
         }
 
-        return $this->repository->create($validator->validated());
+        $item = $this->repository->create($validator->validated());
+
+        Log::info('Grocery item created', [
+            'item_id' => $item->id,
+            'name' => $item->name,
+            'price' => $item->price,
+            'stock' => $item->stock,
+        ]);
+
+        return $item;
     }
 
     public function update(GroceryItem $groceryItem, array $data): GroceryItem
@@ -51,7 +61,15 @@ class GroceryItemService
             throw new ValidationException($validator);
         }
 
-        return $this->repository->update($groceryItem, $validator->validated());
+        $item = $this->repository->update($groceryItem, $validator->validated());
+
+        Log::info('Grocery item updated', [
+            'item_id' => $item->id,
+            'name' => $item->name,
+            'updated_fields' => array_keys($validator->validated()),
+        ]);
+
+        return $item;
     }
 
     public function updateStock(GroceryItem $groceryItem, array $data): GroceryItem
@@ -64,11 +82,29 @@ class GroceryItemService
             throw new ValidationException($validator);
         }
 
-        return $this->repository->update($groceryItem, ['stock' => $validator->validated()['stock']]);
+        $item = $this->repository->update($groceryItem, ['stock' => $validator->validated()['stock']]);
+
+        Log::info('Grocery item stock updated', [
+            'item_id' => $item->id,
+            'name' => $item->name,
+            'new_stock' => $item->stock,
+        ]);
+
+        return $item;
     }
 
     public function delete(GroceryItem $groceryItem): bool
     {
-        return $this->repository->delete($groceryItem);
+        $itemId = $groceryItem->id;
+        $itemName = $groceryItem->name;
+
+        $result = $this->repository->delete($groceryItem);
+
+        Log::info('Grocery item deleted', [
+            'item_id' => $itemId,
+            'name' => $itemName,
+        ]);
+
+        return $result;
     }
 }

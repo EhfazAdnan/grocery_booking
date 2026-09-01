@@ -67,12 +67,12 @@ class OrderServiceTest extends TestCase
         ]);
     }
 
-    public function test_place_order_throws_validation_exception_on_insufficient_stock(): void
+    public function test_place_order_throws_insufficient_stock_exception(): void
     {
         $user = User::factory()->customer()->create();
         $item = GroceryItem::factory()->create(['price' => 50, 'stock' => 2]);
 
-        $this->expectException(ValidationException::class);
+        $this->expectException(\App\Exceptions\InsufficientStockException::class);
 
         $this->orderService->placeOrder($user, [
             'items' => [
@@ -125,8 +125,8 @@ class OrderServiceTest extends TestCase
                     ['product_id' => $item2->id, 'quantity' => 5], // insufficient
                 ],
             ]);
-            $this->fail('Expected ValidationException was not thrown.');
-        } catch (ValidationException $e) {
+            $this->fail('Expected InsufficientStockException was not thrown.');
+        } catch (\App\Exceptions\InsufficientStockException $e) {
             // Expected
         }
 

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\Repositories\OrderItemRepositoryInterface;
 use App\Contracts\Repositories\OrderRepositoryInterface;
+use App\Exceptions\InsufficientStockException;
 use App\Models\GroceryItem;
 use App\Models\Order;
 use App\Models\User;
@@ -64,9 +65,7 @@ class OrderService
                             'available' => $product->stock,
                         ]);
 
-                        throw ValidationException::withMessages([
-                            'items' => ['Insufficient stock for product: '.$product->name],
-                        ]);
+                        throw new InsufficientStockException($product->name, $entry['quantity'], $product->stock);
                     }
 
                     $subtotal = $product->price * $entry['quantity'];
@@ -119,6 +118,13 @@ class OrderService
             Log::error('Order placement validation error', [
                 'user_id' => $user->id,
                 'errors' => $e->errors(),
+            ]);
+
+            throw $e;
+        } catch (InsufficientStockException $e) {
+            Log::error('Order placement failed - insufficient stock', [
+                'user_id' => $user->id,
+                'exception' => $e->getMessage(),
             ]);
 
             throw $e;

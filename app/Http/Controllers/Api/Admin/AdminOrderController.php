@@ -45,18 +45,14 @@ class AdminOrderController
      */
     public function changeStatus(Request $request, Order $order): JsonResponse
     {
-        try {
-            $validated = $request->validate([
-                'status' => 'required|string|in:' . implode(',', OrderStatus::values()),
-            ]);
+        $validated = $request->validate([
+            'status' => 'required|string|in:' . implode(',', OrderStatus::values()),
+        ]);
 
-            $newStatus = OrderStatus::from($validated['status']);
-            $updatedOrder = $this->statusService->changeStatus($order, $newStatus);
+        $newStatus = OrderStatus::from($validated['status']);
+        $updatedOrder = $this->statusService->changeStatus($order, $newStatus);
 
-            return response()->json(['data' => $updatedOrder], 200);
-        } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        }
+        return response()->json(['data' => $updatedOrder], 200);
     }
 
     /**
@@ -98,7 +94,9 @@ class AdminOrderController
 
         // Validate period
         if (!in_array($period, ['daily', 'weekly', 'monthly'])) {
-            return response()->json(['errors' => ['period' => ['Period must be daily, weekly, or monthly.']]], 422);
+            throw ValidationException::withMessages([
+                'period' => ['Period must be daily, weekly, or monthly.'],
+            ]);
         }
 
         $startDate = $request->query('start_date');

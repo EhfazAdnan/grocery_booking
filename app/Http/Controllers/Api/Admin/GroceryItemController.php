@@ -28,13 +28,9 @@ class GroceryItemController
 
     public function store(Request $request): JsonResponse
     {
-        try {
-            $item = $this->groceryItemService->create($request->all());
+        $item = $this->groceryItemService->create($request->all());
 
-            return response()->json(['data' => $item], 201);
-        } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        }
+        return response()->json(['data' => $item], 201);
     }
 
     public function show(GroceryItem $groceryItem): JsonResponse
@@ -44,24 +40,16 @@ class GroceryItemController
 
     public function update(Request $request, GroceryItem $groceryItem): JsonResponse
     {
-        try {
-            $item = $this->groceryItemService->update($groceryItem, $request->all());
+        $item = $this->groceryItemService->update($groceryItem, $request->all());
 
-            return response()->json(['data' => $item], 200);
-        } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        }
+        return response()->json(['data' => $item], 200);
     }
 
     public function updateStock(Request $request, GroceryItem $groceryItem): JsonResponse
     {
-        try {
-            $item = $this->groceryItemService->updateStock($groceryItem, $request->all());
+        $item = $this->groceryItemService->updateStock($groceryItem, $request->all());
 
-            return response()->json(['data' => $item], 200);
-        } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        }
+        return response()->json(['data' => $item], 200);
     }
 
     public function destroy(GroceryItem $groceryItem): JsonResponse

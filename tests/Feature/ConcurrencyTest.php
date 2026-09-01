@@ -67,7 +67,8 @@ class ConcurrencyTest extends TestCase
         ]);
 
         $response2->assertStatus(422)
-            ->assertJsonStructure(['errors']);
+            ->assertJsonStructure(['success', 'message'])
+            ->assertJson(['success' => false]);
 
         // Verify only one order total (customer1's succeeded, customer2's failed)
         $this->assertEquals(1, Order::count(), 'Expected exactly 1 order in database');

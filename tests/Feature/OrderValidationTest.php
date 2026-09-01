@@ -156,7 +156,8 @@ class OrderValidationTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonStructure(['errors' => ['items']]);
+            ->assertJsonStructure(['success', 'message'])
+            ->assertJson(['success' => false]);
 
         $this->assertDatabaseCount('orders', 0);
         $this->assertDatabaseHas('grocery_items', [

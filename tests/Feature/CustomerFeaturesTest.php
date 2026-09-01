@@ -184,6 +184,7 @@ class CustomerFeaturesTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonStructure(['errors']);
+            ->assertJsonStructure(['success', 'message'])
+            ->assertJson(['success' => false]);
     }
 }

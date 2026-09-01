@@ -6,6 +6,7 @@ use App\Enums\Role;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class RoleMiddleware
 {
@@ -24,7 +25,7 @@ class RoleMiddleware
         $userRole = $user->role instanceof Role ? $user->role->value : (string) $user->role;
 
         if (! in_array($userRole, $allowedRoles, true)) {
-            return response()->json(['message' => 'Forbidden'], 403);
+            throw new AccessDeniedHttpException('Forbidden. You do not have permission to access this resource.');
         }
 
         return $next($request);
