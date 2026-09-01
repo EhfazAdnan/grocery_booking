@@ -3,6 +3,8 @@
 @section('title', 'Checkout')
 
 @section('content')
+<div id="toast" class="hidden fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-white"></div>
+
 <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-900">Checkout</h1>
 </div>
@@ -80,15 +82,32 @@
     let cart = JSON.parse(localStorage.getItem('cart')) || {};
     let allProducts = [];
 
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+
+        const colors = {
+            success: 'bg-green-600',
+            error: 'bg-red-600',
+            info: 'bg-blue-600'
+        };
+
+        toast.textContent = message;
+        toast.className = `fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${colors[type] || colors.success}`;
+        toast.classList.remove('hidden');
+
+        setTimeout(() => toast.classList.add('hidden'), 2500);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         if (!token) {
-            alert('Please login first');
+            showToast('Please login first', 'error');
             window.location.href = '/login';
             return;
         }
 
         if (Object.keys(cart).length === 0) {
-            alert('Your cart is empty');
+            showToast('Your cart is empty', 'error');
             window.location.href = '/customer/products';
             return;
         }
@@ -164,8 +183,16 @@
         });
     }
 
+    async function placeOrder(event) {
+        return handleCheckout(event);
+    }
+
     async function handleCheckout(event) {
         event.preventDefault();
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Placing order...';
 
         const items = Object.entries(cart).map(([productId, quantity]) => ({
             product_id: parseInt(productId),
@@ -186,19 +213,20 @@
                 const data = await response.json();
                 const orderId = data.data.id;
 
-                // Clear cart
                 localStorage.removeItem('cart');
-
-                // Show success
-                alert('Order placed successfully! Order ID: #' + orderId);
+                showToast('Order placed successfully!', 'success');
                 window.location.href = `/customer/order-confirmation?id=${orderId}`;
             } else {
                 const error = await response.json();
-                alert('Error: ' + JSON.stringify(error.errors || error.message));
+                showToast('Error: ' + JSON.stringify(error.errors || error.message), 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Place Order';
             }
         } catch (error) {
             console.error('Error placing order:', error);
-            alert('Error placing order. Please try again.');
+            showToast('Error placing order. Please try again.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Place Order';
         }
     }
 

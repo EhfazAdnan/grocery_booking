@@ -8,6 +8,8 @@
     <p class="text-gray-600 mt-2">Explore our fresh selection of products</p>
 </div>
 
+<div id="toast" class="hidden fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-white"></div>
+
 <!-- Filters -->
 <div class="bg-white rounded-lg shadow p-4 mb-6">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -76,7 +78,27 @@
     document.addEventListener('DOMContentLoaded', () => {
         loadProducts();
         updatePriceDisplay();
+        updateCartCount();
     });
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+
+        const colors = {
+            success: 'bg-green-600',
+            error: 'bg-red-600',
+            info: 'bg-blue-600'
+        };
+
+        toast.textContent = message;
+        toast.className = `fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${colors[type] || colors.success}`;
+        toast.classList.remove('hidden');
+
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 2500);
+    }
 
     async function loadProducts() {
         try {
@@ -84,8 +106,10 @@
             const data = await response.json();
             allProducts = data.data || [];
             renderProducts(allProducts);
+            updateCartCount();
         } catch (error) {
             console.error('Error loading products:', error);
+            showToast('Could not load products.', 'error');
         }
     }
 
@@ -180,7 +204,8 @@
         if (product && qty > 0) {
             cart[productId] = (cart[productId] || 0) + qty;
             localStorage.setItem('cart', JSON.stringify(cart));
-            alert(`Added ${qty} x ${product.name} to cart!`);
+            updateCartCount();
+            showToast(`Added ${qty} x ${product.name} to cart!`, 'success');
         }
     }
 
@@ -225,12 +250,14 @@
     function removeFromCart(productId) {
         delete cart[productId];
         localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
         openCartModal();
+        showToast('Item removed from cart.', 'info');
     }
 
     function proceedToCheckout() {
         if (!token) {
-            alert('Please login first');
+            showToast('Please login first', 'error');
             window.location.href = '/login';
             return;
         }

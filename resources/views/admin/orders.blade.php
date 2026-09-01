@@ -3,6 +3,8 @@
 @section('title', 'Admin - Orders Management')
 
 @section('content')
+<div id="toast" class="hidden fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-white"></div>
+
 <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-900">Orders Management</h1>
 </div>
@@ -62,6 +64,23 @@
 <script>
     const token = localStorage.getItem('token');
     let currentOrderId = null;
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+
+        const colors = {
+            success: 'bg-green-600',
+            error: 'bg-red-600',
+            info: 'bg-blue-600'
+        };
+
+        toast.textContent = message;
+        toast.className = `fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${colors[type] || colors.success}`;
+        toast.classList.remove('hidden');
+
+        setTimeout(() => toast.classList.add('hidden'), 2500);
+    }
 
     document.addEventListener('DOMContentLoaded', loadOrders);
 
@@ -180,12 +199,14 @@
             if (response.ok) {
                 closeOrderModal();
                 loadOrders();
+                showToast('Order status updated successfully.', 'success');
             } else {
                 const error = await response.json();
-                alert('Error: ' + JSON.stringify(error.errors || error.message));
+                showToast('Error: ' + JSON.stringify(error.errors || error.message), 'error');
             }
         } catch (error) {
             console.error('Error updating status:', error);
+            showToast('Could not update order status.', 'error');
         }
     }
 
