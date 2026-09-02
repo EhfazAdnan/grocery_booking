@@ -63,11 +63,11 @@
 
             if (response.ok) {
                 const data = await response.json();
-                localStorage.setItem('token', data.data.access_token);
-                localStorage.setItem('user', JSON.stringify(data.data.user));
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('user', JSON.stringify(data.user));
 
                 // Redirect based on role
-                const user = data.data.user;
+                const user = data.user;
                 if (user.role === 'admin') {
                     window.location.href = '/admin/products';
                 } else {

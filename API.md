@@ -46,6 +46,9 @@ Register a new customer account.
 ```json
 {
     "message": "User registered successfully",
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOi...",
+    "token_type": "Bearer",
+    "expires_in": 3600,
     "user": {
         "id": 1,
         "name": "John Doe",
@@ -54,6 +57,7 @@ Register a new customer account.
     }
 }
 ```
+*The new user is automatically authenticated — the `access_token` can be used immediately.*
 
 **Validation Rules:**
 - `name`: required, string, max 255 chars
@@ -80,7 +84,13 @@ Login and receive a JWT token.
     "message": "Authentication successful",
     "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOi...",
     "token_type": "Bearer",
-    "expires_in": 3600
+    "expires_in": 3600,
+    "user": {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com",
+        "role": "customer"
+    }
 }
 ```
 

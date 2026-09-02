@@ -17,11 +17,13 @@ class AuthController
     public function register(Request $request): JsonResponse
     {
         $user = $this->authService->register($request->all());
+        $token = $this->authService->issueToken($user);
 
-        return response()->json([
-            'message' => 'User registered successfully',
-            'user' => $user,
-        ], 201);
+        $response = $this->authService->tokenResponse($token);
+        $response['message'] = 'User registered successfully';
+        $response['user'] = $user;
+
+        return response()->json($response, 201);
     }
 
     /**
@@ -38,7 +40,10 @@ class AuthController
             ], 401);
         }
 
-        return response()->json($this->authService->tokenResponse($token), 200);
+        $response = $this->authService->tokenResponse($token);
+        $response['user'] = $this->authService->me();
+
+        return response()->json($response, 200);
     }
 
     /**

@@ -71,6 +71,17 @@ class AuthService
         return $token;
     }
 
+    /**
+     * Generate a JWT for a given user (e.g. immediately after registration).
+     */
+    public function issueToken(User $user): string
+    {
+        /** @var JWTGuard $guard */
+        $guard = auth('api');
+
+        return $guard->login($user);
+    }
+
     public function me(): ?User
     {
         /** @var JWTGuard $guard */
