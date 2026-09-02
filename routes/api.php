@@ -40,6 +40,7 @@ Route::middleware('auth:api')->group(function () {
 
         // Order management
         Route::get('/admin/orders', [AdminOrderController::class, 'index']);
+        Route::get('/admin/orders/{order}', [AdminOrderController::class, 'show']);
         Route::put('/admin/orders/{order}/status', [AdminOrderController::class, 'changeStatus']);
 
         // Analytics

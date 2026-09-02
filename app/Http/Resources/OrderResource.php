@@ -21,6 +21,11 @@ class OrderResource extends JsonResource
                 'name' => $this->user?->name,
                 'email' => $this->user?->email,
             ]),
+            'user' => $this->whenLoaded('user', fn() => [
+                'id' => $this->user?->id,
+                'name' => $this->user?->name,
+                'email' => $this->user?->email,
+            ]),
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
         ];
     }

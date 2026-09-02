@@ -26,7 +26,7 @@ class AdminOrderController
     public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->query('per_page', 10);
-        $orders = Order::with(['user', 'items'])
+        $orders = Order::with(['user', 'items.groceryItem'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
@@ -39,6 +39,17 @@ class AdminOrderController
                 'last_page' => $orders->lastPage(),
             ]
         ], 200);
+    }
+
+    /**
+     * Show single order details.
+     * GET /admin/orders/{order}
+     */
+    public function show(Order $order): JsonResponse
+    {
+        $order->load(['user', 'items.groceryItem']);
+
+        return response()->json(['data' => new OrderResource($order)], 200);
     }
 
     /**

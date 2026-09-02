@@ -111,23 +111,32 @@
             const countResponse = await fetch(`/api/admin/analytics/order-count?period=daily`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            const countData = await countResponse.json();
-            const counts = countData.data;
 
-            // Simple bar chart representation
-            let chartHtml = '';
-            const maxCount = Math.max(...counts.map(c => c.order_count), 1);
+            if (countResponse.ok) {
+                const countData = await countResponse.json();
+                const counts = countData.data || [];
 
-            counts.slice(-7).forEach(item => {
-                const height = (item.order_count / maxCount) * 100;
-                chartHtml += `
-                    <div class="flex flex-col items-center">
-                        <div class="bg-green-500 rounded-t" style="width: 30px; height: ${height}%;"></div>
-                        <p class="text-xs mt-1 text-gray-600">${item.order_count}</p>
-                    </div>
-                `;
-            });
-            document.getElementById('dailyChart').innerHTML = chartHtml;
+                // Simple bar chart representation
+                let chartHtml = '';
+
+                if (counts.length > 0) {
+                    const maxCount = Math.max(...counts.map(c => c.order_count), 1);
+
+                    counts.slice(-7).forEach(item => {
+                        const height = (item.order_count / maxCount) * 100;
+                        chartHtml += `
+                            <div class="flex flex-col items-center">
+                                <div class="bg-green-500 rounded-t" style="width: 30px; height: ${height}%;"></div>
+                                <p class="text-xs mt-1 text-gray-600">${item.order_count}</p>
+                            </div>
+                        `;
+                    });
+                } else {
+                    chartHtml = `<p class="text-gray-500 text-center w-full">${t('No data available')}</p>`;
+                }
+
+                document.getElementById('dailyChart').innerHTML = chartHtml;
+            }
 
         } catch (error) {
             console.error('Error loading analytics:', error);
