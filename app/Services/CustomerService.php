@@ -11,8 +11,6 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class CustomerService
 {
@@ -65,22 +63,10 @@ class CustomerService
 
     public function updateProfile(User $user, array $data): User
     {
-        $validator = Validator::make($data, [
-            'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email|max:255|unique:users,email,'.$user->id,
-            'password' => 'sometimes|required|string|min:8|confirmed',
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
         }
 
-        $payload = $validator->validated();
-
-        if (isset($payload['password'])) {
-            $payload['password'] = Hash::make($payload['password']);
-        }
-
-        return $this->customerProfileRepository->update($user, $payload);
+        return $this->customerProfileRepository->update($user, $data);
     }
 }

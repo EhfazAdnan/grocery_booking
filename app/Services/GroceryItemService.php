@@ -5,10 +5,7 @@ namespace App\Services;
 use App\Contracts\Repositories\GroceryItemRepositoryInterface;
 use App\Models\GroceryItem;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class GroceryItemService
 {
@@ -23,19 +20,7 @@ class GroceryItemService
 
     public function create(array $data): GroceryItem
     {
-        $validator = Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'price' => 'required|numeric|gt:0|decimal:0,2',
-            'stock' => 'required|integer|min:0',
-            'is_active' => 'boolean',
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
-        $item = $this->repository->create($validator->validated());
+        $item = $this->repository->create($data);
 
         Log::info('Grocery item created', [
             'item_id' => $item->id,
@@ -49,24 +34,12 @@ class GroceryItemService
 
     public function update(GroceryItem $groceryItem, array $data): GroceryItem
     {
-        $validator = Validator::make($data, [
-            'name' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'price' => 'sometimes|required|numeric|gt:0|decimal:0,2',
-            'stock' => 'sometimes|required|integer|min:0',
-            'is_active' => 'sometimes|boolean',
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
-        $item = $this->repository->update($groceryItem, $validator->validated());
+        $item = $this->repository->update($groceryItem, $data);
 
         Log::info('Grocery item updated', [
             'item_id' => $item->id,
             'name' => $item->name,
-            'updated_fields' => array_keys($validator->validated()),
+            'updated_fields' => array_keys($data),
         ]);
 
         return $item;
@@ -74,15 +47,7 @@ class GroceryItemService
 
     public function updateStock(GroceryItem $groceryItem, array $data): GroceryItem
     {
-        $validator = Validator::make($data, [
-            'stock' => 'required|integer|min:0',
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
-        $item = $this->repository->update($groceryItem, ['stock' => $validator->validated()['stock']]);
+        $item = $this->repository->update($groceryItem, ['stock' => $data['stock']]);
 
         Log::info('Grocery item stock updated', [
             'item_id' => $item->id,

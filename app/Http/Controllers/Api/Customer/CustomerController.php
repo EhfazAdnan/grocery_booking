@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Api\Customer;
 
+use App\Http\Requests\PlaceOrderRequest;
+use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Resources\GroceryItemResource;
+use App\Http\Resources\OrderResource;
+use App\Http\Resources\UserResource;
 use App\Models\Order;
-use App\Models\User;
 use App\Services\CustomerService;
 use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 class CustomerController
 {
@@ -22,7 +25,7 @@ class CustomerController
         $items = $this->customerService->browseProducts($request->all());
 
         return response()->json([
-            'data' => $items->items(),
+            'data' => GroceryItemResource::collection(collect($items->items())),
             'meta' => [
                 'current_page' => $items->currentPage(),
                 'last_page' => $items->lastPage(),
@@ -38,7 +41,7 @@ class CustomerController
         $orders = $this->customerService->getOrderHistory($user);
 
         return response()->json([
-            'data' => $orders->items(),
+            'data' => OrderResource::collection(collect($orders->items())),
             'meta' => [
                 'current_page' => $orders->currentPage(),
                 'last_page' => $orders->lastPage(),
@@ -51,44 +54,26 @@ class CustomerController
     {
         $user = $request->user();
 
-        return response()->json(['data' => $this->customerService->profile($user)], 200);
+        return response()->json(['data' => new UserResource($this->customerService->profile($user))], 200);
     }
 
-    public function updateProfile(Request $request): JsonResponse
+    public function updateProfile(UpdateProfileRequest $request): JsonResponse
     {
         $user = $request->user();
 
-        $updatedUser = $this->customerService->updateProfile($user, $request->all());
+        $updatedUser = $this->customerService->updateProfile($user, $request->validated());
 
-        return response()->json(['data' => $updatedUser], 200);
+        return response()->json(['data' => new UserResource($updatedUser)], 200);
     }
 
-    public function placeOrder(Request $request): JsonResponse
+    public function placeOrder(PlaceOrderRequest $request): JsonResponse
     {
         $user = $request->user();
 
-        $order = $this->orderService->placeOrder($user, $request->all());
-
-        $items = $order->items->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'order_id' => $item->order_id,
-                'product_id' => $item->grocery_item_id,
-                'grocery_item_id' => $item->grocery_item_id,
-                'quantity' => $item->quantity,
-                'unit_price' => (string) $item->unit_price,
-                'subtotal' => (string) $item->subtotal,
-            ];
-        })->values();
+        $order = $this->orderService->placeOrder($user, $request->validated());
 
         return response()->json([
-            'data' => [
-                'id' => $order->id,
-                'user_id' => $order->user_id,
-                'status' => $order->status,
-                'total_amount' => (string) $order->total_amount,
-                'items' => $items,
-            ],
+            'data' => new OrderResource($order->load('items')),
         ], 201);
     }
 
@@ -105,28 +90,8 @@ class CustomerController
             return response()->json(['message' => 'Not found'], 404);
         }
 
-        $items = $order->items->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'order_id' => $item->order_id,
-                'product_id' => $item->grocery_item_id,
-                'product_name' => $item->groceryItem->name,
-                'quantity' => $item->quantity,
-                'unit_price' => (string) $item->unit_price,
-                'subtotal' => (string) $item->subtotal,
-            ];
-        })->values();
-
         return response()->json([
-            'data' => [
-                'id' => $order->id,
-                'user_id' => $order->user_id,
-                'status' => $order->status,
-                'total_amount' => (string) $order->total_amount,
-                'status_changed_at' => $order->status_changed_at,
-                'created_at' => $order->created_at,
-                'items' => $items,
-            ],
+            'data' => new OrderResource($order->load('items.groceryItem')),
         ], 200);
     }
 }

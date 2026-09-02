@@ -99,11 +99,11 @@ class OrderServiceTest extends TestCase
         ]);
     }
 
-    public function test_place_order_throws_validation_exception_on_invalid_payload(): void
+    public function test_place_order_throws_on_nonexistent_product(): void
     {
         $user = User::factory()->customer()->create();
 
-        $this->expectException(ValidationException::class);
+        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
 
         $this->orderService->placeOrder($user, [
             'items' => [

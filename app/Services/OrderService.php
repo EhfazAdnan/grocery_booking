@@ -10,7 +10,6 @@ use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class OrderService
@@ -23,18 +22,7 @@ class OrderService
 
     public function placeOrder(User $user, array $payload): Order
     {
-        $validator = Validator::make($payload, [
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|integer|exists:grocery_items,id',
-            'items.*.quantity' => 'required|integer|min:1',
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
-        $validated = $validator->validated();
-        $items = $validated['items'];
+        $items = $payload['items'];
 
         try {
             return DB::transaction(function () use ($user, $items) {

@@ -6,24 +6,12 @@ use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\JWTGuard;
 
 class AuthService
 {
     public function register(array $data): User
     {
-        $validator = Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/[A-Z]/', 'regex:/[0-9]/'],
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -46,15 +34,6 @@ class AuthService
 
     public function login(array $credentials): string|false
     {
-        $validator = Validator::make($credentials, [
-            'email' => 'required|string|email',
-            'password' => 'required|string|min:8',
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
         /** @var JWTGuard $guard */
         $guard = auth('api');
 

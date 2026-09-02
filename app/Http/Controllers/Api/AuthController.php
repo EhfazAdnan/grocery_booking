@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 class AuthController
 {
@@ -14,14 +15,14 @@ class AuthController
     /**
      * Register a new user.
      */
-    public function register(Request $request): JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $user = $this->authService->register($request->all());
+        $user = $this->authService->register($request->validated());
         $token = $this->authService->issueToken($user);
 
         $response = $this->authService->tokenResponse($token);
         $response['message'] = 'User registered successfully';
-        $response['user'] = $user;
+        $response['user'] = new UserResource($user);
 
         return response()->json($response, 201);
     }
@@ -29,9 +30,9 @@ class AuthController
     /**
      * Login user and return JWT token.
      */
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        $token = $this->authService->login($request->all());
+        $token = $this->authService->login($request->validated());
 
         if (!$token) {
             return response()->json([
@@ -41,7 +42,7 @@ class AuthController
         }
 
         $response = $this->authService->tokenResponse($token);
-        $response['user'] = $this->authService->me();
+        $response['user'] = new UserResource($this->authService->me());
 
         return response()->json($response, 200);
     }
@@ -57,7 +58,7 @@ class AuthController
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        return response()->json(['user' => $user], 200);
+        return response()->json(['user' => new UserResource($user)], 200);
     }
 
     /**

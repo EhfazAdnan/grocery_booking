@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Enums\OrderStatus;
+use App\Http\Requests\ChangeOrderStatusRequest;
+use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Services\AnalyticsService;
 use App\Services\OrderStatusService;
@@ -29,7 +31,7 @@ class AdminOrderController
             ->paginate($perPage);
 
         return response()->json([
-            'data' => $orders->items(),
+            'data' => OrderResource::collection(collect($orders->items())),
             'pagination' => [
                 'total' => $orders->total(),
                 'per_page' => $orders->perPage(),
@@ -43,16 +45,12 @@ class AdminOrderController
      * Change order status.
      * PUT /admin/orders/{id}/status
      */
-    public function changeStatus(Request $request, Order $order): JsonResponse
+    public function changeStatus(ChangeOrderStatusRequest $request, Order $order): JsonResponse
     {
-        $validated = $request->validate([
-            'status' => 'required|string|in:' . implode(',', OrderStatus::values()),
-        ]);
-
-        $newStatus = OrderStatus::from($validated['status']);
+        $newStatus = OrderStatus::from($request->validated()['status']);
         $updatedOrder = $this->statusService->changeStatus($order, $newStatus);
 
-        return response()->json(['data' => $updatedOrder], 200);
+        return response()->json(['data' => new OrderResource($updatedOrder)], 200);
     }
 
     /**
