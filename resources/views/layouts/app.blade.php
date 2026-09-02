@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', __('Grocery Booking System'))</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org"></script>
@@ -205,6 +206,15 @@
                             'Authorization': 'Bearer ' + t,
                         },
                     }).catch(function () { /* token invalidation is best-effort */ });
+                }
+
+                // End the server-side (Blade) session as well.
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                if (csrfMeta) {
+                    fetch('/logout', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': csrfMeta.getAttribute('content') },
+                    }).catch(function () { /* session invalidation is best-effort */ });
                 }
 
                 window.location.href = '/login';

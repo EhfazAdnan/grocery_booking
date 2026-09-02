@@ -31,6 +31,11 @@ class AuthService
             'role' => Role::CUSTOMER,
         ]);
 
+        // Auto-login on the web (session) guard so Blade pages recognize the
+        // newly registered user immediately. API responses keep using JWT.
+        auth('web')->login($user);
+        request()->session()->regenerate();
+
         Log::info('User registered successfully', [
             'user_id' => $user->id,
             'email' => $user->email,
@@ -57,6 +62,12 @@ class AuthService
 
         if ($token) {
             $user = $guard->user();
+
+            // Establish the web (session) guard in the same response so Blade
+            // pages (@auth, auth()->user()) recognize the user. API calls keep
+            // authenticating with the JWT Bearer token.
+            auth('web')->login($user);
+            request()->session()->regenerate();
 
             Log::info('User logged in successfully', [
                 'user_id' => $user?->id,
@@ -96,6 +107,12 @@ class AuthService
         $guard = auth('api');
 
         $user = $guard->user();
+
+        // End the web (session) guard session as well; safe when the client
+        // never had one (e.g. pure API consumers).
+        auth('web')->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
 
         Log::info('User logged out', [
             'user_id' => $user?->id,

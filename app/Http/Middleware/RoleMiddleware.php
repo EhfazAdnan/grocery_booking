@@ -18,14 +18,23 @@ class RoleMiddleware
         $user = $request->user();
 
         if (! $user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+
+            return redirect()->guest(route('login'));
         }
 
         $allowedRoles = array_map('strtolower', $roles);
         $userRole = $user->role instanceof Role ? $user->role->value : (string) $user->role;
 
         if (! in_array($userRole, $allowedRoles, true)) {
-            throw new AccessDeniedHttpException('Forbidden. You do not have permission to access this resource.');
+            if ($request->expectsJson()) {
+                throw new AccessDeniedHttpException('Forbidden. You do not have permission to access this resource.');
+            }
+
+            // Full-page (web) request: send the user to their own dashboard.
+            return redirect($userRole === Role::ADMIN->value ? '/admin/products' : '/customer/products');
         }
 
         return $next($request);

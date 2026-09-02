@@ -21,6 +21,9 @@ class Phase11Test extends TestCase
 
     public function test_checkout_page_includes_ajax_order_submission(): void
     {
+        $customer = \App\Models\User::factory()->customer()->create();
+        $this->actingAs($customer);
+
         $response = $this->get('/customer/checkout');
 
         $response->assertStatus(200);
@@ -31,6 +34,9 @@ class Phase11Test extends TestCase
 
     public function test_admin_orders_page_includes_ajax_status_updates(): void
     {
+        $admin = \App\Models\User::factory()->admin()->create();
+        $this->actingAs($admin);
+
         $response = $this->get('/admin/orders');
 
         $response->assertStatus(200);

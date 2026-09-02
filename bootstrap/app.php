@@ -28,10 +28,27 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
         ]);
+
+        // Cookie + session middleware on API routes lets the auth endpoints
+        // establish the Blade (web guard) session in the same response as the
+        // JWT. EncryptCookies MUST run so the session cookie is written
+        // encrypted — identical to the web group — otherwise pages cannot
+        // read the API-issued session cookie. API authorization still
+        // requires the JWT Bearer token.
+        $middleware->api(append: [
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Handle authentication exceptions → 401
-        $exceptions->render(function (AuthenticationException $e) {
+        // Handle authentication exceptions: JSON 401 for API requests,
+        // redirect to login for full-page (Blade) requests
+        $exceptions->render(function (AuthenticationException $e, \Illuminate\Http\Request $request) {
+            if (! $request->expectsJson()) {
+                return redirect()->guest(route('login'));
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthenticated. Please provide a valid token.',

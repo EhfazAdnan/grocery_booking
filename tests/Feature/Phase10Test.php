@@ -18,6 +18,7 @@ class Phase10Test extends TestCase
     public function test_admin_can_view_products_page()
     {
         $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin);
 
         $response = $this->get('/admin/products');
 
@@ -31,6 +32,7 @@ class Phase10Test extends TestCase
     public function test_admin_can_view_orders_page()
     {
         $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin);
 
         $response = $this->get('/admin/orders');
 
@@ -44,6 +46,7 @@ class Phase10Test extends TestCase
     public function test_admin_can_view_analytics_page()
     {
         $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin);
 
         $response = $this->get('/admin/analytics');
 
@@ -68,6 +71,7 @@ class Phase10Test extends TestCase
     public function test_customer_can_view_orders_page()
     {
         $customer = User::factory()->create(['role' => 'customer']);
+        $this->actingAs($customer);
 
         $response = $this->get('/customer/orders');
 
@@ -81,6 +85,7 @@ class Phase10Test extends TestCase
     public function test_customer_can_view_checkout_page()
     {
         $customer = User::factory()->create(['role' => 'customer']);
+        $this->actingAs($customer);
 
         $response = $this->get('/customer/checkout');
 
@@ -94,6 +99,7 @@ class Phase10Test extends TestCase
     public function test_customer_can_view_order_confirmation_page()
     {
         $customer = User::factory()->create(['role' => 'customer']);
+        $this->actingAs($customer);
 
         $response = $this->get('/customer/order-confirmation');
 
