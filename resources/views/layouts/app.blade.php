@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Grocery Booking System')</title>
+    <title>@yield('title', __('Grocery Booking System'))</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org"></script>
+    @include('partials.i18n')
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
@@ -14,15 +15,15 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="/" class="flex items-center">
-                        <span class="text-2xl font-bold text-green-600">🛒 Grocery</span>
+                        <span class="text-2xl font-bold text-green-600">🛒 {{ __('Grocery') }}</span>
                     </a>
                 </div>
 
                 <div class="flex items-center space-x-4">
                     <!-- Guest links (shown when not logged in) -->
                     <div id="guestLinks" class="flex items-center space-x-4 {{ auth()->check() ? 'hidden' : '' }}">
-                        <a href="/login" class="text-gray-700 hover:text-green-600 transition">{{ __('messages.nav.login') }}</a>
-                        <a href="/register" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">{{ __('messages.nav.register') }}</a>
+                        <a href="/login" class="text-gray-700 hover:text-green-600 transition">{{ __('Login') }}</a>
+                        <a href="/register" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">{{ __('Register') }}</a>
                     </div>
 
                     <!-- Logged-in user dropdown (next to language switcher) -->
@@ -30,7 +31,7 @@
                         <button id="userMenuButton" type="button"
                                 class="flex items-center space-x-2 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition">
                             <span id="userName">{{ auth()->check() ? (auth()->user()->name ?: auth()->user()->email) : '' }}</span>
-                            <span id="userRoleBadge" class="px-2 py-0.5 text-xs font-semibold text-white bg-red-600 rounded {{ auth()->check() && auth()->user()->isAdmin() ? '' : 'hidden' }}">ADMIN</span>
+                            <span id="userRoleBadge" class="px-2 py-0.5 text-xs font-semibold text-white bg-red-600 rounded {{ auth()->check() && auth()->user()->isAdmin() ? '' : 'hidden' }}">{{ __('ADMIN') }}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
@@ -44,18 +45,18 @@
                             <div id="userNavLinks" class="py-1">
                                 {{-- Filled client-side from localStorage; server-side fallback below --}}
                                 @if (auth()->check() && auth()->user()->isAdmin())
-                                    <a href="/admin/products" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('messages.nav.products') }}</a>
-                                    <a href="/admin/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('messages.nav.orders') }}</a>
-                                    <a href="/admin/analytics" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('messages.nav.analytics') }}</a>
+                                    <a href="/admin/products" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Products') }}</a>
+                                    <a href="/admin/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Orders') }}</a>
+                                    <a href="/admin/analytics" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Analytics') }}</a>
                                 @elseif (auth()->check())
-                                    <a href="/customer/products" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('messages.nav.browse') }}</a>
-                                    <a href="/customer/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('messages.nav.my_orders') }}</a>
+                                    <a href="/customer/products" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('Browse') }}</a>
+                                    <a href="/customer/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('My Orders') }}</a>
                                 @endif
                             </div>
                             <div class="border-t border-gray-100 py-1">
                                 <button id="logoutButton" type="button"
                                         class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                    {{ __('messages.nav.logout') }}
+                                    {{ __('Logout') }}
                                 </button>
                             </div>
                         </div>
@@ -64,9 +65,9 @@
                     <!-- Language Switcher -->
                     <select onchange="window.location.href='/locale/'+this.value"
                             class="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
-                        @foreach (['en', 'bn', 'es', 'fr'] as $lang)
+                        @foreach (config('locales.supported') as $lang)
                             <option value="{{ $lang }}" {{ app()->getLocale() === $lang ? 'selected' : '' }}>
-                                {{ __('messages.language.'.$lang) }}
+                                {{ config('locales.labels.'.$lang) }}
                             </option>
                         @endforeach
                     </select>
@@ -78,7 +79,7 @@
     <!-- Alert Messages -->
     @if ($errors->any())
         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
-            <p class="font-bold">Error</p>
+            <p class="font-bold">{{ __('Error') }}</p>
             <ul class="list-disc ml-5">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -100,21 +101,18 @@
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white text-center py-4 mt-12">
-        <p>&copy; {{ date('Y') }} Grocery Booking System. All rights reserved.</p>
+        <p>&copy; {{ date('Y') }} {{ __('Grocery Booking System. All rights reserved.') }}</p>
     </footer>
 <script>
-    // Translations for the nav/role links, injected server-side.
-    @php
-        $navLabels = [
-            'logout' => __('messages.nav.logout'),
-            'browse' => __('messages.nav.browse'),
-            'my_orders' => __('messages.nav.my_orders'),
-            'products' => __('messages.nav.products'),
-            'orders' => __('messages.nav.orders'),
-            'analytics' => __('messages.nav.analytics'),
-        ];
-    @endphp
-    const NAV_LABELS = @json($navLabels);
+    // Translations for the nav/role links, injected via the shared i18n dictionary.
+    const NAV_LABELS = {
+        logout: t('Logout'),
+        browse: t('Browse'),
+        my_orders: t('My Orders'),
+        products: t('Products'),
+        orders: t('Orders'),
+        analytics: t('Analytics'),
+    };
 
     document.addEventListener('DOMContentLoaded', function () {
         const guestLinks = document.getElementById('guestLinks');
@@ -132,7 +130,7 @@
 
         function renderUserMenu(u) {
             const isAdmin = u.role === 'admin';
-            const displayName = u.name || u.email || 'User';
+            const displayName = u.name || u.email || t('User');
 
             guestLinks.classList.add('hidden');
             userMenu.classList.remove('hidden');

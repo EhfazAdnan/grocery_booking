@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Browse Products')
+@section('title', __('Browse Products'))
 
 @section('content')
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-900">Browse Groceries</h1>
-    <p class="text-gray-600 mt-2">Explore our fresh selection of products</p>
+    <h1 class="text-3xl font-bold text-gray-900">{{ __('Browse Groceries') }}</h1>
+    <p class="text-gray-600 mt-2">{{ __('Explore our fresh selection of products') }}</p>
 </div>
 
 <div id="toast" class="hidden fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-white"></div>
@@ -14,25 +14,25 @@
 <div class="bg-white rounded-lg shadow p-4 mb-6">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-            <input type="text" id="searchInput" placeholder="Search products..."
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Search') }}</label>
+            <input type="text" id="searchInput" placeholder="{{ __('Search products...') }}"
                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                    onkeyup="filterProducts()">
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Price Range') }}</label>
             <input type="range" id="priceRange" min="0" max="1000" step="10"
                    class="w-full" onchange="filterProducts()">
-            <small class="text-gray-600">Max: $<span id="priceValue">1000</span></small>
+            <small class="text-gray-600">{{ __('Max: $') }}<span id="priceValue">1000</span></small>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Stock Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Stock Status') }}</label>
             <select id="stockFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     onchange="filterProducts()">
-                <option value="">All</option>
-                <option value="in">In Stock</option>
-                <option value="low">Low Stock</option>
-                <option value="out">Out of Stock</option>
+                <option value="">{{ __('All') }}</option>
+                <option value="in">{{ __('In Stock') }}</option>
+                <option value="low">{{ __('Low Stock') }}</option>
+                <option value="out">{{ __('Out of Stock') }}</option>
             </select>
         </div>
     </div>
@@ -46,7 +46,7 @@
 <!-- Shopping Cart Modal -->
 <div id="cartModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-        <h2 class="text-2xl font-bold mb-4">Shopping Cart</h2>
+        <h2 class="text-2xl font-bold mb-4">{{ __('Shopping Cart') }}</h2>
 
         <div id="cartItems" class="mb-4 max-h-96 overflow-y-auto">
             <!-- Cart items displayed here -->
@@ -54,17 +54,17 @@
 
         <div class="border-t-2 pt-4 mb-6">
             <p class="flex justify-between text-lg font-bold">
-                <span>Total:</span>
+                <span>{{ __('Total:') }}</span>
                 <span>$<span id="cartTotal">0.00</span></span>
             </p>
         </div>
 
         <div class="flex justify-end space-x-3">
             <button type="button" onclick="closeCartModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                Continue Shopping
+                {{ __('Continue Shopping') }}
             </button>
             <button type="button" onclick="proceedToCheckout()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                Checkout
+                {{ __('Checkout') }}
             </button>
         </div>
     </div>
@@ -109,7 +109,7 @@
             updateCartCount();
         } catch (error) {
             console.error('Error loading products:', error);
-            showToast('Could not load products.', 'error');
+            showToast(t('Could not load products.'), 'error');
         }
     }
 
@@ -128,24 +128,24 @@
                     </div>
                     <div class="p-4">
                         <h3 class="font-semibold text-gray-900">${product.name}</h3>
-                        <p class="text-sm text-gray-600 mt-1">${product.description || 'Fresh product'}</p>
+                        <p class="text-sm text-gray-600 mt-1">${product.description || t('Fresh product')}</p>
                         <div class="flex justify-between items-center mt-4">
                             <span class="text-2xl font-bold text-green-600">$${parseFloat(product.price).toFixed(2)}</span>
                             <span class="text-xs font-semibold ${getStatusColorClass(status)}">${status}</span>
                         </div>
-                        <p class="text-sm text-gray-600 mt-2">Stock: ${product.stock}</p>
+                        <p class="text-sm text-gray-600 mt-2">${t('Stock: :count', { count: product.stock })}</p>
                         ${product.stock > 0 ? `
                             <div class="flex gap-2 mt-4">
                                 <input type="number" id="qty-${product.id}" value="1" min="1" max="${product.stock}"
                                        class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm">
                                 <button onclick="addToCart(${product.id})"
                                         class="flex-1 bg-green-600 text-white py-1 rounded hover:bg-green-700 transition">
-                                    Add ${inCart > 0 ? `(${inCart})` : ''}
+                                    ${t('Add')} ${inCart > 0 ? `(${inCart})` : ''}
                                 </button>
                             </div>
                         ` : `
                             <button disabled class="w-full mt-4 bg-gray-400 text-white py-2 rounded cursor-not-allowed">
-                                Out of Stock
+                                ${t('Out of Stock')}
                             </button>
                         `}
                     </div>
@@ -156,16 +156,16 @@
     }
 
     function getStockStatus(stock) {
-        if (stock === 0) return 'Out of Stock';
-        if (stock < 5) return 'Low Stock';
-        return 'In Stock';
+        if (stock === 0) return t('Out of Stock');
+        if (stock < 5) return t('Low Stock');
+        return t('In Stock');
     }
 
     function getStatusColorClass(status) {
         switch(status) {
-            case 'In Stock': return 'bg-green-100 text-green-800';
-            case 'Low Stock': return 'bg-yellow-100 text-yellow-800';
-            case 'Out of Stock': return 'bg-red-100 text-red-800';
+            case t('In Stock'): return 'bg-green-100 text-green-800';
+            case t('Low Stock'): return 'bg-yellow-100 text-yellow-800';
+            case t('Out of Stock'): return 'bg-red-100 text-red-800';
             default: return 'bg-gray-100 text-gray-800';
         }
     }
@@ -205,13 +205,13 @@
             cart[productId] = (cart[productId] || 0) + qty;
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCartCount();
-            showToast(`Added ${qty} x ${product.name} to cart!`, 'success');
+            showToast(t('Added :qty x :name to cart!', { qty: qty, name: product.name }), 'success');
         }
     }
 
     function openCartModal() {
         if (Object.keys(cart).length === 0) {
-            alert('Your cart is empty');
+            alert(t('Your cart is empty'));
             return;
         }
 
@@ -227,11 +227,11 @@
                     <div class="flex justify-between py-2 border-b">
                         <div>
                             <p class="font-medium">${product.name}</p>
-                            <p class="text-sm text-gray-600">Qty: ${qty} x $${parseFloat(product.price).toFixed(2)}</p>
+                            <p class="text-sm text-gray-600">${t('Qty: :qty', { qty: qty })} x $${parseFloat(product.price).toFixed(2)}</p>
                         </div>
                         <div class="text-right">
                             <p class="font-semibold">$${parseFloat(subtotal).toFixed(2)}</p>
-                            <button onclick="removeFromCart(${productId})" class="text-red-600 hover:text-red-800 text-sm">Remove</button>
+                            <button onclick="removeFromCart(${productId})" class="text-red-600 hover:text-red-800 text-sm">${t('Remove')}</button>
                         </div>
                     </div>
                 `;
@@ -252,12 +252,12 @@
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartCount();
         openCartModal();
-        showToast('Item removed from cart.', 'info');
+        showToast(t('Item removed from cart.'), 'info');
     }
 
     function proceedToCheckout() {
         if (!token) {
-            showToast('Please login first', 'error');
+            showToast(t('Please login first'), 'error');
             window.location.href = '/login';
             return;
         }

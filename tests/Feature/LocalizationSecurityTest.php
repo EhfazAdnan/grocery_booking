@@ -45,14 +45,6 @@ class LocalizationSecurityTest extends TestCase
         $this->assertEquals('es', session('locale'));
     }
 
-    public function test_locale_switcher_sets_french(): void
-    {
-        $response = $this->get('/locale/fr');
-
-        $response->assertRedirect();
-        $this->assertEquals('fr', session('locale'));
-    }
-
     public function test_locale_switcher_rejects_invalid_locale(): void
     {
         $response = $this->get('/locale/invalid');
@@ -64,24 +56,24 @@ class LocalizationSecurityTest extends TestCase
 
     public function test_translation_files_exist_for_all_locales(): void
     {
-        foreach (['en', 'bn', 'es', 'fr'] as $locale) {
-            $path = lang_path("{$locale}/messages.php");
+        foreach (['en', 'bn', 'es'] as $locale) {
+            $path = lang_path("{$locale}.json");
             $this->assertFileExists($path);
 
-            $translations = require $path;
+            $translations = json_decode(file_get_contents($path), true);
             $this->assertIsArray($translations);
-            $this->assertArrayHasKey('nav', $translations);
-            $this->assertArrayHasKey('auth', $translations);
-            $this->assertArrayHasKey('products', $translations);
+            $this->assertArrayHasKey('Login', $translations);
+            $this->assertArrayHasKey('Product Management', $translations);
+            $this->assertArrayHasKey('Shopping Cart', $translations);
         }
     }
 
     public function test_bangla_translations_are_valid(): void
     {
-        $translations = require lang_path('bn/messages.php');
+        $translations = json_decode(file_get_contents(lang_path('bn.json')), true);
 
-        $this->assertEquals('লগইন', $translations['auth']['login_title']);
-        $this->assertEquals('বাংলা', $translations['language']['bn']);
+        $this->assertEquals('লগইন', $translations['Login']);
+        $this->assertEquals('ব্যবহারকারী', $translations['User']);
     }
 
     public function test_layout_includes_language_switcher(): void

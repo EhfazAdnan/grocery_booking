@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Admin - Orders Management')
+@section('title', __('Admin - Orders Management'))
 
 @section('content')
 <div id="toast" class="hidden fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-white"></div>
 
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-900">Orders Management</h1>
+    <h1 class="text-3xl font-bold text-gray-900">{{ __('Orders Management') }}</h1>
 </div>
 
 <!-- Orders Table -->
@@ -14,12 +14,12 @@
     <table class="w-full">
         <thead class="bg-gray-100 border-b">
             <tr>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Order ID</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Customer</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Date</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Total</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">{{ __('Order ID') }}</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">{{ __('Customer') }}</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">{{ __('Date') }}</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">{{ __('Total') }}</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">{{ __('Status') }}</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">{{ __('Actions') }}</th>
             </tr>
         </thead>
         <tbody class="divide-y" id="orders-list">
@@ -32,7 +32,7 @@
 <div id="orderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold">Order Details</h2>
+            <h2 class="text-2xl font-bold">{{ __('Order Details') }}</h2>
             <button onclick="closeOrderModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
         </div>
 
@@ -41,21 +41,21 @@
         </div>
 
         <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Order Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Order Status') }}</label>
             <select id="orderStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="pending">{{ __('Pending') }}</option>
+                <option value="confirmed">{{ __('Confirmed') }}</option>
+                <option value="delivered">{{ __('Delivered') }}</option>
+                <option value="cancelled">{{ __('Cancelled') }}</option>
             </select>
         </div>
 
         <div class="flex justify-end space-x-3">
             <button type="button" onclick="closeOrderModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                Close
+                {{ __('Close') }}
             </button>
             <button type="button" onclick="updateOrderStatus()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                Update Status
+                {{ __('Update Status') }}
             </button>
         </div>
     </div>
@@ -105,11 +105,11 @@
                             <td class="px-6 py-4 text-sm text-gray-900 font-semibold">$${parseFloat(order.total_amount).toFixed(2)}</td>
                             <td class="px-6 py-4 text-sm">
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}">
-                                    ${capitalizeStatus(order.status)}
+                                    ${t(capitalizeStatus(order.status))}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm">
-                                <button onclick="viewOrderDetails(${order.id})" class="text-blue-600 hover:text-blue-800">View</button>
+                                <button onclick="viewOrderDetails(${order.id})" class="text-blue-600 hover:text-blue-800">${t('View')}</button>
                             </td>
                         </tr>
                     `;
@@ -146,13 +146,13 @@
             currentOrderId = orderId;
             document.getElementById('orderStatus').value = order.status;
 
-            let itemsHtml = '<div class="mb-4"><h3 class="font-semibold mb-2">Order Items:</h3>';
+            let itemsHtml = '<div class="mb-4"><h3 class="font-semibold mb-2">' + t('Order Items:') + '</h3>';
             order.items.forEach(item => {
                 itemsHtml += `
                     <div class="flex justify-between py-2 border-b">
                         <div>
-                            <p class="font-medium">${item.product_name || 'Product'}</p>
-                            <p class="text-sm text-gray-600">Qty: ${item.quantity}</p>
+                            <p class="font-medium">${item.product_name || t('Product')}</p>
+                            <p class="text-sm text-gray-600">${t('Qty: :qty', { qty: item.quantity })}</p>
                         </div>
                         <p class="font-semibold">$${parseFloat(item.subtotal).toFixed(2)}</p>
                     </div>
@@ -162,13 +162,13 @@
 
             const detailsHtml = `
                 <div class="space-y-2">
-                    <p><span class="font-medium">Order ID:</span> #${order.id}</p>
-                    <p><span class="font-medium">Customer Email:</span> ${order.user.email}</p>
-                    <p><span class="font-medium">Date:</span> ${new Date(order.created_at).toLocaleString()}</p>
+                    <p><span class="font-medium">${t('Order ID:')}</span> #${order.id}</p>
+                    <p><span class="font-medium">${t('Customer Email:')}</span> ${order.user.email}</p>
+                    <p><span class="font-medium">${t('Date:')}</span> ${new Date(order.created_at).toLocaleString()}</p>
                     ${itemsHtml}
                     <div class="border-t-2 pt-4">
                         <p class="flex justify-between text-lg font-bold">
-                            <span>Total:</span>
+                            <span>${t('Total:')}</span>
                             <span>$${parseFloat(order.total_amount).toFixed(2)}</span>
                         </p>
                     </div>
@@ -179,7 +179,7 @@
             document.getElementById('orderModal').classList.remove('hidden');
         } catch (error) {
             console.error('Error loading order details:', error);
-            alert('Error loading order details');
+            alert(t('Error loading order details'));
         }
     }
 
@@ -199,14 +199,14 @@
             if (response.ok) {
                 closeOrderModal();
                 loadOrders();
-                showToast('Order status updated successfully.', 'success');
+                showToast(t('Order status updated successfully.'), 'success');
             } else {
                 const error = await response.json();
-                showToast('Error: ' + JSON.stringify(error.errors || error.message), 'error');
+                showToast(t('Error: :details', { details: JSON.stringify(error.errors || error.message) }), 'error');
             }
         } catch (error) {
             console.error('Error updating status:', error);
-            showToast('Could not update order status.', 'error');
+            showToast(t('Could not update order status.'), 'error');
         }
     }
 

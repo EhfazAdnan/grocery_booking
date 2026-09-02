@@ -12,7 +12,7 @@ class LocaleController extends Controller
      */
     public function switch(Request $request, string $locale): RedirectResponse
     {
-        $allowedLocales = ['en', 'bn', 'es', 'fr'];
+        $allowedLocales = config('locales.supported', []);
 
         if (in_array($locale, $allowedLocales)) {
             session(['locale' => $locale]);

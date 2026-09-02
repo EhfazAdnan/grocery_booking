@@ -1,40 +1,40 @@
 @extends('layouts.app')
 
-@section('title', 'Admin - Analytics')
+@section('title', __('Admin - Analytics'))
 
 @section('content')
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+    <h1 class="text-3xl font-bold text-gray-900">{{ __('Analytics Dashboard') }}</h1>
 </div>
 
 <!-- Analytics Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Revenue Card -->
     <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-gray-600 text-sm font-semibold mb-2">Total Revenue</h3>
+        <h3 class="text-gray-600 text-sm font-semibold mb-2">{{ __('Total Revenue') }}</h3>
         <p class="text-3xl font-bold text-gray-900">$<span id="totalRevenue">0.00</span></p>
-        <p class="text-xs text-gray-600 mt-2">All time</p>
+        <p class="text-xs text-gray-600 mt-2">{{ __('All time') }}</p>
     </div>
 
     <!-- Orders Card -->
     <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-gray-600 text-sm font-semibold mb-2">Total Orders</h3>
+        <h3 class="text-gray-600 text-sm font-semibold mb-2">{{ __('Total Orders') }}</h3>
         <p class="text-3xl font-bold text-gray-900" id="totalOrders">0</p>
-        <p class="text-xs text-gray-600 mt-2">Completed orders</p>
+        <p class="text-xs text-gray-600 mt-2">{{ __('Completed orders') }}</p>
     </div>
 
     <!-- Avg Order Value -->
     <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-gray-600 text-sm font-semibold mb-2">Avg Order Value</h3>
+        <h3 class="text-gray-600 text-sm font-semibold mb-2">{{ __('Avg Order Value') }}</h3>
         <p class="text-3xl font-bold text-gray-900">$<span id="avgOrderValue">0.00</span></p>
-        <p class="text-xs text-gray-600 mt-2">Average per order</p>
+        <p class="text-xs text-gray-600 mt-2">{{ __('Average per order') }}</p>
     </div>
 
     <!-- Top Product -->
     <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-gray-600 text-sm font-semibold mb-2">Top Product</h3>
+        <h3 class="text-gray-600 text-sm font-semibold mb-2">{{ __('Top Product') }}</h3>
         <p class="text-lg font-bold text-gray-900" id="topProduct">—</p>
-        <p class="text-xs text-gray-600 mt-2">Most ordered</p>
+        <p class="text-xs text-gray-600 mt-2">{{ __('Most ordered') }}</p>
     </div>
 </div>
 
@@ -43,10 +43,10 @@
     <!-- Daily Orders -->
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Orders by Day</h3>
+            <h3 class="text-lg font-semibold text-gray-900">{{ __('Orders by Day') }}</h3>
             <select id="dailyFilter" class="px-3 py-1 border border-gray-300 rounded text-sm" onchange="loadAnalytics()">
-                <option value="7">Last 7 days</option>
-                <option value="30">Last 30 days</option>
+                <option value="7">{{ __('Last 7 days') }}</option>
+                <option value="30">{{ __('Last 30 days') }}</option>
             </select>
         </div>
         <div id="dailyChart" class="h-48 flex items-end justify-around">
@@ -56,7 +56,7 @@
 
     <!-- Top Products -->
     <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 5 Products</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Top 5 Products') }}</h3>
         <div id="topProductsList" class="space-y-3">
             <!-- Products list -->
         </div>
@@ -97,7 +97,7 @@
                         <div class="flex justify-between items-center py-2 border-b">
                             <div>
                                 <p class="font-medium text-gray-900">${index + 1}. ${product.product_name}</p>
-                                <p class="text-xs text-gray-600">${product.order_count} orders</p>
+                                <p class="text-xs text-gray-600">${t('Orders: :count', { count: product.order_count })}</p>
                             </div>
                             <p class="font-semibold text-gray-900">$${parseFloat(product.total_revenue).toFixed(2)}</p>
                         </div>
