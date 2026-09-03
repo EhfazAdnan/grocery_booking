@@ -87,7 +87,9 @@ This creates demo users and products:
 - Email: `alice@example.com`, `bob@example.com`, `carol@example.com`, `david@example.com`, `eva@example.com`
 - Password: `Password123` (for all)
 
-### 9. Build Frontend Assets
+### 9. Build Frontend Assets (Optional)
+
+The frontend loads Tailwind CSS and htmx from a CDN, so this step is **not required** to run the application.
 
 ```bash
 npm run build
@@ -156,7 +158,7 @@ php artisan test tests/Feature/AuthTest.php
 ### Common Issues
 
 **1. "JWT Secret not set"**
-Run `php artisan jwt:generate` to generate a secret.
+Run `php artisan jwt:secret` to generate a secret (the `jwt:generate` command was removed in `tymon/jwt-auth` v2).
 
 **2. "Database connection failed"**
 Verify your `.env` database credentials and ensure MySQL is running.
@@ -187,6 +189,20 @@ See [API.md](API.md) for complete API documentation including endpoints, request
 ## Docker
 
 ### Using Docker Compose
+
+> **Before starting:** the containers bind-mount your project directory, so a local `.env` file is required — `docker compose` only reads `.env.docker`, which contains no `APP_KEY` or `JWT_SECRET`.
+>
+> ```bash
+> cp .env.example .env
+> php artisan key:generate
+> php artisan jwt:secret
+> ```
+>
+> On Linux/macOS, also ensure the web server can write to the storage directories (the bind mount overrides the permission setup done in the `Dockerfile`):
+>
+> ```bash
+> chmod -R 775 storage bootstrap/cache
+> ```
 
 Build and start the containers:
 
@@ -222,6 +238,7 @@ docker compose down
 
 | Service | Port | Description |
 |---------|------|-------------|
-| app | 8000 | PHP + Laravel application |
-| mysql | 3306 | MySQL database |
+| webserver | 8000 | Nginx web server (entry point at http://localhost:8000) |
+| app | 9000 | PHP 8.2-FPM + Laravel application (internal PHP-FPM; not exposed to the host) |
+| mysql | 3306 | MySQL 8.0 database |
 | redis | 6379 | Redis cache |
