@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LocaleController;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +20,11 @@ Route::get('/', function () {
 
 // Authentication Routes
 Route::get('/login', function () {
-    return view('auth.login');
+    // Show seeded test accounts only if they exist in the DB.
+    $admin = User::where('email', 'admin@grocery.com')->first();
+    $demo = User::where('email', 'alice@example.com')->first();
+
+    return view('auth.login', compact('admin', 'demo'));
 })->name('login');
 
 Route::get('/register', function () {

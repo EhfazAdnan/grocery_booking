@@ -67,6 +67,33 @@
             </button>
         </form>
 
+        @if ($admin || $demo)
+            <div class="mt-6">
+                <div class="relative flex items-center justify-center mb-4">
+                    <span class="absolute inset-x-0 border-t border-gray-200"></span>
+                    <span class="relative bg-white px-3 text-xs text-gray-500">{{ __('Test accounts') }}</span>
+                </div>
+                <div class="grid grid-cols-1 gap-3">
+                    @if ($admin)
+                    <button type="button" onclick="fillTestAccount('{{ $admin->email }}', 'Password123')"
+                            class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition">
+                        <span class="block text-sm font-semibold text-gray-800">{{ __('Admin') }}</span>
+                        <span class="block text-xs text-gray-500">{{ $admin->email }}</span>
+                        <span class="block text-xs text-gray-400 mt-1">Password: Password123</span>
+                    </button>
+                    @endif
+                    @if ($demo)
+                    <button type="button" onclick="fillTestAccount('{{ $demo->email }}', 'Password123')"
+                            class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition">
+                        <span class="block text-sm font-semibold text-gray-800">{{ __('Demo User') }}</span>
+                        <span class="block text-xs text-gray-500">{{ $demo->email }}</span>
+                        <span class="block text-xs text-gray-400 mt-1">Password: Password123</span>
+                    </button>
+                    @endif
+                </div>
+            </div>
+        @endif
+
         <p class="text-center text-gray-600 mt-6">
             {{ __("Don't have an account?") }}
             <a href="/register" class="text-green-600 hover:text-green-800 font-semibold">{{ __('Register here') }}</a>
@@ -106,6 +133,12 @@
             console.error('Error:', error);
             alert(t('An error occurred. Please try again.'));
         }
+    }
+
+    function fillTestAccount(email, password) {
+        document.getElementById('email').value = email;
+        document.getElementById('password').value = password;
+        document.getElementById('password').focus();
     }
 </script>
 @endsection
