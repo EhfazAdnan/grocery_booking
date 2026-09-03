@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env.docker
     container_name: grocery_app
     restart: unless-stopped
     working_dir: /var/www
