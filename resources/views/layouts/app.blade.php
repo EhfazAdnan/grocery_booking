@@ -115,7 +115,29 @@
         analytics: t('Analytics'),
     };
 
-    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
+        // Password visibility toggle (shared across login & registration forms).
+        document.querySelectorAll('[data-password-toggle]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var input = document.querySelector(this.getAttribute('data-password-toggle'));
+                var showIcon = this.querySelector('[data-icon-show]');
+                var hideIcon = this.querySelector('[data-icon-hide]');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    showIcon.classList.add('hidden');
+                    hideIcon.classList.remove('hidden');
+                    this.setAttribute('aria-label', this.getAttribute('data-label-hide'));
+                    this.setAttribute('title', this.getAttribute('data-label-hide'));
+                } else {
+                    input.type = 'password';
+                    showIcon.classList.remove('hidden');
+                    hideIcon.classList.add('hidden');
+                    this.setAttribute('aria-label', this.getAttribute('data-label-show'));
+                    this.setAttribute('title', this.getAttribute('data-label-show'));
+                }
+            });
+        });
+
         const guestLinks = document.getElementById('guestLinks');
         const userMenu = document.getElementById('userMenu');
         const userDropdown = document.getElementById('userDropdown');
